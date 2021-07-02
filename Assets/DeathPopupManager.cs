@@ -62,3 +62,4 @@ public class DeathPopupManager : MonoBehaviour
         deathtext.text = death[index];
     }
 }
+
