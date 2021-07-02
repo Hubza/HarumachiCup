@@ -17,6 +17,7 @@ public class DeathPopupManager : MonoBehaviour
     public bool win = false;
     public float curtime = 0;
 
+    // assign through inspector plz
     public string[] death = new string[]
     {
         "couldn't handle the pressure",
@@ -44,19 +45,23 @@ public class DeathPopupManager : MonoBehaviour
 
     public void loadinfo()
     {
-        name.text = Global.players[boxid].username;
-        pfp.sprite = Sprite.Create(Global.players[boxid].pfp, new Rect(0, 0, Global.players[boxid].pfp.width, Global.players[boxid].pfp.height), new Vector2(0.5f, 0.5f));
-        began = true;
-        e.Play();
+        name.text = Global.players[boxid].username; // gets user's username
+
+        pfp.sprite = Sprite.Create(Global.players[boxid].pfp, 
+            new Rect(0, 0, Global.players[boxid].pfp.width, 
+            Global.players[boxid].pfp.height), 
+            new Vector2(0.5f, 0.5f));               // assigns the sprite of the pfp to a new sprite craeted from the player's pfp
+
+        began = true;                               // begin
+        e.Play();                                   // play the animation
+
         if(win == true)
         {
+            // on the occasion that they win, we want to jump before the death message and replace it
             MainController mc = Global.players[boxid].pb.mc;
             string maintext = "has won this match!";
-            //maintext += "<font-weight=100>" + mc.qualifiers.text + "</font-weight>";
-            //maintext += " <font-weight=500>" + mc.roundtext.text + "</font-weight>";
-            //maintext += " <font-weight=700>" + mc.roundnum.text + "</font-weight>\n";
             deathtext.text = maintext;
-            return;
+            return; // then return
         }
         int index = Random.Range(0, death.Length);
         deathtext.text = death[index];

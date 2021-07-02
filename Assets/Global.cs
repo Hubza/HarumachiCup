@@ -6,6 +6,8 @@ public static class Global
 {
     public class Player
     {
+        // this is each player, one of these gets created for each PB
+
         public int osuid { get; set; }
         public Texture2D pfp { get; set; }
         public string username { get; set; }
@@ -23,8 +25,9 @@ public static class Global
 
     public class osekaiCache
     {
-        public int osuid { get; set; }
-        public string response { get; set; }
+        // api cache
+        public int osuid { get; set; }          // user's osu! id
+        public string response { get; set; }    // response from osekai
         public osekaiCache(int o_osuid, string o_response)
         {
             osuid = o_osuid;
@@ -34,8 +37,9 @@ public static class Global
 
     public class pfpCache
     {
-        public int osuid { get; set; }
-        public Texture2D texture { get; set; }
+        // pfp cache
+        public int osuid { get; set; }          // user's osu! id
+        public Texture2D texture { get; set; }  // texture2d of their pfp
 
         public pfpCache(int o_osuid, Texture2D o_texture)
         {
@@ -53,9 +57,8 @@ public static class Global
     {
         foreach (Player x in players)
         {
-
+            // runs through every player and updates them
             x.pb.update();
-            
         }
     }
 }

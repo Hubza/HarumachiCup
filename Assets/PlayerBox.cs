@@ -22,18 +22,29 @@ public class PlayerBox : MonoBehaviour
 
     public IEnumerator GetRequest()
     {
-        osuid = Global.players[id].osuid;
+        osuid = Global.players[id].osuid;               // gets the user's osu! id
+
         Debug.Log("UPDATING OBJECT " + id.ToString() + " WITH OBJECT NAME " + Global.players[id].pb.name + " AND OSU ID " + osuid);
         bool cached = false;
         bool pfp_cached = false;
-        Texture2D cached_pfp = Texture2D.whiteTexture;
+
+        Texture2D cached_pfp = Texture2D.whiteTexture;  // sets the pfp to white. in the occasion that we cant load the pfp, we dont want to fail horribly
+
         string response = "";
 
-        pfp.sprite = Sprite.Create(Texture2D.whiteTexture, new Rect(0, 0, Texture2D.whiteTexture.width, Texture2D.whiteTexture.height), new Vector2(0.5f, 0.5f));
+        pfp.sprite = Sprite.Create(Texture2D.whiteTexture, 
+            new Rect(0, 0, Texture2D.whiteTexture.width, 
+            Texture2D.whiteTexture.height), 
+            new Vector2(0.5f, 0.5f));                   // set the sprite itself to white, to mitigate errors n stuff
+
+
         name.text = "Loading...";
 
         foreach (Global.pfpCache cache in Global.pfp_cache)
         {
+            // check the pfp cache to see if the user's pfp has already been cached
+            // this isnt performant in any way but i dont think this matters in this case
+
             if (cache.osuid == osuid)
             {
                 cached = true;
@@ -45,7 +56,8 @@ public class PlayerBox : MonoBehaviour
 
         foreach (Global.osekaiCache cache in Global.cache)
         {
-            //Debug.Log("from cache: " + cache.response);
+            // check cache for the response itself
+
             if (cache.osuid == osuid)
             {
                 pfp_cached = true;
@@ -56,6 +68,10 @@ public class PlayerBox : MonoBehaviour
 
         if (cached == false)
         {
+            // if it's not cached we're gonna send a request to osekai's servers to get user data
+            //
+            // osekai is an alternative rankings system for osu! - we use their data.
+
             using (UnityWebRequest www = UnityWebRequest.Get("https://osekai.net/eclipse/api/profiles/get_user.php?bypass_local=true&id=" + osuid))
             {
                 yield return www.SendWebRequest();
@@ -63,18 +79,20 @@ public class PlayerBox : MonoBehaviour
                 if (www.isNetworkError)
                 {
                     Debug.Log("uh oh the network code did a fucky wucky");
+                    // if this happens there are bigger issues
                 }
                 else
                 {
                     response = www.downloadHandler.text;
                     Global.cache.Add(new Global.osekaiCache(osuid, response));
+                    // cache it
                 }
             }
         }
 
-        Debug.Log(response);
-        JObject o = JObject.Parse(response);
-        Debug.Log(o["username"]);
+        Debug.Log(response);                // log the response
+        JObject o = JObject.Parse(response);// parse it into a jobject
+        Debug.Log(o["username"]);           // print the username, just to check if it worked
 
         Global.players[id].username = (string)o["username"];
         name.text = (string)o["username"];
@@ -82,6 +100,7 @@ public class PlayerBox : MonoBehaviour
 
         if (pfp_cached == false)
         {
+            // basically the same as user data get but with pfp
             UnityWebRequest request = UnityWebRequestTexture.GetTexture("https://a.ppy.sh/" + osuid);
             yield return request.SendWebRequest();
             if (request.isNetworkError || request.isHttpError)
@@ -102,6 +121,7 @@ public class PlayerBox : MonoBehaviour
 
 
         pfp.sprite = Sprite.Create(Global.players[id].pfp, new Rect(0, 0, Global.players[id].pfp.width, Global.players[id].pfp.height), new Vector2(0.5f, 0.5f));
+        // update sprite
 
         yield return true;
     }
@@ -109,15 +129,18 @@ public class PlayerBox : MonoBehaviour
     public void update()
     {
         StartCoroutine(GetRequest());
+        // guess
     }
 
     public void Start()
     {
         itsme = this.GetComponent<Button>();
         itsme.onClick.AddListener(click);
+        // we're gonna get the button and then listen for clicks
+        // this allows us to die when clicked
     }
 
-    public bool dead;
+    public bool dead; // rip
     public Color32 red = new Color32(255, 5, 95, 190);
 
 
@@ -125,6 +148,7 @@ public class PlayerBox : MonoBehaviour
     {
         if(dead == true)
         {
+            // gonna unkill the user, then return. this stops the rest from running, as we don't want it to
             GetComponent<Image>().color = Color.white;
             name.color = Color.white;
             pfp.color = Color.white;
@@ -142,12 +166,14 @@ public class PlayerBox : MonoBehaviour
         {
             if(pb.pb.dead == true)
             {
-                alive -= 1;
+                alive -= 1; // this removes one from the alive count.
             }
         }
         
         if(alive == 2)
         {
+            // if the alive count is true then this is the final click.
+            // whoever's clicked dies, and the one who isn't wins.
             final = true;
         }
 
@@ -155,11 +181,12 @@ public class PlayerBox : MonoBehaviour
         {
             if (dead == false)
             {
-                GetComponent<Image>().color = red;
-                name.color = red;
-                pfp.color = new Color(1, 1, 1, 0.5f);
-                mc.die(id);
-                dead = true;
+                // if we're not dead and its not final, we'll die
+                GetComponent<Image>().color = red;      // set to red
+                name.color = red;                       // set to red
+                pfp.color = new Color(1, 1, 1, 0.5f);   // set to opaque red
+                mc.die(id);                             // tell the maincontroller to start the animation
+                dead = true;                            // die
             }
         }
         else
@@ -168,10 +195,15 @@ public class PlayerBox : MonoBehaviour
             {
                 foreach (Global.Player pb in Global.players)
                 {
+                    // gonna go through each one
                     if (pb.pb.dead == false)
                     {
+                        // if they're not dead
                         if (pb.pb.id == id)
                         {
+                            // and they're us
+                            // ... we're gonna die.
+
                             GetComponent<Image>().color = red;
                             name.color = red;
                             pfp.color = new Color(1, 1, 1, 0.5f);
@@ -179,6 +211,10 @@ public class PlayerBox : MonoBehaviour
                         }
                         else
                         {
+                            // else there's only one remaining due to the requirement of final
+                            // and he's the winner.
+                            // so we let them win.
+
                             winner = pb.pb.id;
                             pb.pb.GetComponent<Image>().color = Color.yellow;
                             pb.pb.pfp.color = Color.yellow;
@@ -186,7 +222,7 @@ public class PlayerBox : MonoBehaviour
                         }
                     }
                 }
-                mc.win(winner);
+                mc.win(winner); // animate win
             }
         }
     }

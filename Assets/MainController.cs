@@ -31,6 +31,7 @@ public class MainController : MonoBehaviour
     {
         if (silent == false)
         {
+            // there is no reason for this bool
             DeathPopupManager e = GameObject.Instantiate(death_popup, manicanvas.transform).GetComponent<DeathPopupManager>();
             e.boxid = boxid;
             e.loadinfo();
@@ -41,6 +42,7 @@ public class MainController : MonoBehaviour
     {
         if (silent == false)
         {
+            // similarly no reason
             DeathPopupManager e = GameObject.Instantiate(win_popup, manicanvas.transform).GetComponent<DeathPopupManager>();
             e.win = true;
             e.boxid = boxid;
@@ -57,19 +59,21 @@ public class MainController : MonoBehaviour
         maintext += commentator.text + "\n";
         maintext += overlay.text;
         text.text = maintext;
+        // set the texts based on the inputs on the main screen
     }
 
     public void Start()
     {
-        Camera.main.backgroundColor = new Color(0, 0, 0, 0);
+        Camera.main.backgroundColor = new Color(0, 0, 0, 0); // did this to try window transparency, no luck
 
-        Global.cache = new List<Global.osekaiCache>();
-        Global.pfp_cache = new List<Global.pfpCache>();
-        Global.players = new List<Global.Player>();
+        Global.cache = new List<Global.osekaiCache>();  // set cache
+        Global.pfp_cache = new List<Global.pfpCache>(); // set pfp cache
+        Global.players = new List<Global.Player>();     // set players
         int id = 0;
         int osuid = 2;
         foreach(PlayerBox x in pbs)
         {
+            // sets the test ids, helps with, you know, testing
             idinput[id].text = testids[id].ToString();
             Global.players.Add(new Global.Player(testids[id], Texture2D.whiteTexture, "", false, x));
             x.id = id;
@@ -84,6 +88,7 @@ public class MainController : MonoBehaviour
 
     public void showIDChanger()
     {
+        // theres probably an easier way to do this
         if(changer.alpha == 0)
         {
             changer.alpha = 1;
